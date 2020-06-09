@@ -1,2 +1,8 @@
+已有插件：
+	cropperJs			// 图片上传裁剪
+	SlideLikeAMap		// 上拉显示更多内容，类似高德地图首页
+	imageUpload		// 后台图片上传
+	quillEditor			// 富文本编辑
+
 图片压缩：image-compressor.js
 数字滚动、单位：countTo
