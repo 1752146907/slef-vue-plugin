@@ -1,0 +1,99 @@
+docx是否加密检测：
+以下是用法：
+1、https://www.npmjs.com/package/docx-preview
+2、<div id="containerOffice"></div>
+3、import { renderAsync } from 'docx-preview';
+4、renderAsync(fileItem.file, document.getElementById('containerOffice'))
+          .then((x) => console.log('docx: 成功'))
+          .catch((err) => console.log(err));
+
+doc是否加密检测：
+// 校验函数
+const arrayBufferToString = (buffer, encoding = 'utf-8') => {
+  const decoder = new TextDecoder(encoding);
+   return decoder.decode(buffer);
+};
+//  获取buffer流
+var file = fileItem.file;
+var reader = new FileReader();
+reader.onload = function (loadEvent) {
+    let arrayBuffer = loadEvent.target.result;
+    const str = arrayBufferToString(arrayBuffer, 'Unicode'); // str.length 
+    console.log(/䃿/.test(str)); // true或者false
+};
+reader.readAsArrayBuffer(file);
+
+
+excal、ppt是否加密检测：
+以下是用法：
+1、https://www.npmjs.com/package/exceljs
+   or
+   https://github.com/501351981/vue-office/blob/master/core/packages/excel/src/excel.js
+2、import * as Excel from 'exceljs/dist/exceljs';
+3、const readExcelData = (buffer) => {
+      try {
+        const wb = new Excel.Workbook();
+        return wb.xlsx.load(buffer);
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    };
+4、let res = false;
+       res = await readExcelData(fileItem.file)
+          .then((res) => {
+            return true;
+          })
+          .catch((err) => {
+            Message.error('该文档已加密，请解密后重新上传');
+            return false;
+          });
+       return res;
+
+
+pdf是否加密检测：
+文档：https://www.npmjs.com/package/pdfjs-dist
+引入：
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+使用：
+	const file = fileItem.file;
+        let res = false;
+        const reader = new FileReader();
+        if (window.structuredClone) {
+          reader.readAsArrayBuffer(file);
+          await new Promise((resolve, reject) => {
+            reader.onload = () => {
+              const arrayBuffer = reader.result;
+              pdfjsLib
+                .getDocument({ data: arrayBuffer })
+                .promise.then((pdf) => {
+                  res = true;
+                  resolve(true);
+                })
+                .catch((err) => {
+                  Message.error('请上传无密码的pdf文件');
+                  reject(false);
+                  res = false;
+                });
+            };
+          });
+        } else {
+          reader.onload = function (file) {
+            var contents = file.target.result;
+            if (contents.indexOf('/Encrypt') === -1) {
+              res = true;
+              resolve(true);
+            } else {
+              Message.error('请上传无密码的pdf文件,如果pdf没有加密请更换其他浏览器');
+              res = false;
+              return reject(false);
+            }
+          };
+          reader.onerror = function (file) {
+            console.error('File could not be read! Code ');
+          };
+          reader.readAsText(file);
+        }
+        return res;
+
